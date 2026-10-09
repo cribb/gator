@@ -1,0 +1,4 @@
+*.exe
+gator
+*.log
+sandbox/**
