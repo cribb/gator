@@ -5,89 +5,67 @@ import (
 	// "encoding/json"
 	// "strings"
 	"fmt"
-	"os"
 
 	"github.com/cribb/gator/internal/config"
 )
 
-type cliCommand struct {
-	name        string
-	description string
-	callback    func(*cliConfig, []string, error)
+type command struct {
+	name string
+	args []string
 }
 
-// map[string]func(*state, command) error
+type commands struct {
+	// name        string
+	// description string
+	handlers map[string]func(*state, command) error
+}
 
 type state struct {
 	cfg *config.Config
 }
 
-func processCommand(commandLine []string) {
-	commands := getCommands()
+func handlerLogin(s *state, cmd command) error {
 
-	// process input (REPL-like)
+	if len(cmd.args) == 0 {
+		return fmt.Errorf("Error: no username provided.")
+	}
 
-	commandName := commandLine[0]
-	commandArgs := commandLine[1:]
+	// fmt.Printf("cmd.args: %v\n", cmd.args)
+	user := cmd.args[0]
+	err := s.cfg.SetUser(user)
+	if err != nil {
+		// fmt.Println("failed to set user.")
+		return err
+	}
+	fmt.Printf("User set to: %v\n", user)
+	return nil
+}
 
-	command, ok := commands[commandName]
+func (c *commands) run(s *state, cmd command) error {
+
+	f, ok := c.handlers[cmd.name]
 	if !ok {
-		fmt.Println("Unknown command.")
-		cmdHelp(state, commandArgs)
-		cmdExit(state, commandArgs)
+		return fmt.Errorf("Command %s not found.", cmd.name)
 	}
 
-	err := command.callback(state, commandArgs)
-}
-func getCommands() map[string]cliCommand {
-	commands := map[string]cliCommand{
-		"exit": {
-			name:        "exit",
-			description: "Exit gator",
-			callback:    cmdExit,
-		},
-		"quit": {
-			name:        "quit",
-			description: "Exit gator",
-			callback:    cmdExit,
-		},
-		"help": {
-			name:        "help",
-			description: "Displays this command list",
-			callback:    cmdHelp,
-		},
-		"login": {
-			name:        "login",
-			description: "Displays this command list",
-			callback:    cmdHelp,
-		},
-		"register": {
-			name:        "register",
-			description: "Displays this command list",
-			callback:    cmdHelp,
-		},
-		"users": {
-			name:        "users",
-			description: "Displays this command list",
-			callback:    cmdHelp,
-		},
+	err := f(s, cmd)
+	if err != nil {
+		return err
 	}
-	return commands
-}
-
-func cmdExit(config *cliConfig, cmdArgs []string) error {
-	fmt.Printf("Gone from the Gator, bye!\n\n")
-	os.Exit(0)
 	return nil
 }
 
-func cmdHelp(config *cliConfig, cmdArgs []string) error {
-	fmt.Printf("\nWelcome to Gator, the Aggregator!\nUsage:\n\n")
-	commands := getCommands()
-
-	for _, command := range commands {
-		fmt.Printf(" %v\t%v\n", command.name, command.description)
-	}
-	fmt.Println()
-	return nil
+func (c *commands) register(name string, f func(*state, command) error) {
+	c.handlers[name] = f
 }
+
+// func (c *commands) handlerHelp(config *cliConfig, cmdArgs []string) error {
+// 	fmt.Printf("\nWelcome to Gator, the Aggregator!\nUsage:\n\n")
+// 	commands := getCommands()
+
+// 	for _, command := range commands {
+// 		fmt.Printf(" %v\t%v\n", command.name, command.description)
+// 	}
+// 	fmt.Println()
+// 	return nil
+// }

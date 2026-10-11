@@ -39,15 +39,9 @@ func Read() (Config, error) {
 	return cfg, nil
 }
 
-func (cfg *Config) SetUser(username string) {
-
+func (cfg *Config) SetUser(username string) error {
 	cfg.CurrentUsername = username
-
-	if err := write(*cfg); err != nil {
-		fmt.Printf("Error writing file.\n")
-	}
-	fmt.Printf("User set to: %v\n", username)
-
+	return write(*cfg)
 }
 
 func write(config Config) error {
