@@ -45,7 +45,7 @@ func (cfg *Config) SetUser(username string) error {
 }
 
 func write(config Config) error {
-	fmt.Printf("Current config:\n  %+v\n", config)
+	// fmt.Printf("Current config:\n  %+v\n", config)
 
 	configFilepath, err := getConfigFilePath()
 	if err != nil {
