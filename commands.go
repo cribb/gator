@@ -92,7 +92,7 @@ func handlerRegister(s *state, cmd command) error {
 
 	user, err := s.db.CreateUser(context.Background(), params)
 	if err != nil {
-		return fmt.Errorf("Error: failed when creating database user '%v'.\n  (%w)", user.Name, err)
+		return fmt.Errorf("Error: failed when creating database user '%v'.\n  (%w)", newUserName, err)
 	}
 	fmt.Printf("created user '%v'.\n", user.Name)
 	// fmt.Printf("userdata: %v\n", user)
@@ -103,6 +103,34 @@ func handlerRegister(s *state, cmd command) error {
 		return err
 	}
 	fmt.Printf("User set to: %v\n", user.Name)
+	return nil
+}
+
+func handlerUsers(s *state, cmd command) error {
+	users, err := s.db.GetUsers(context.Background())
+	if err != nil {
+		return fmt.Errorf("Error generating user list.\n  (%w)\n", err)
+	}
+
+	currentUser := s.cfg.CurrentUsername
+
+	for _, user := range users {
+		fmt.Printf(" * %s", user)
+		if user == currentUser {
+			fmt.Printf(" (current)")
+		}
+		fmt.Println()
+	}
+
+	return nil
+}
+
+func handlerReset(s *state, cmd command) error {
+	err := s.db.ResetUsers(context.Background())
+	if err != nil {
+		return fmt.Errorf("Error reseting users table.\n  (%w)\n", err)
+	}
+	fmt.Println("Resetting users table: successful")
 	return nil
 }
 

@@ -38,6 +38,8 @@ func main() {
 	// Register the list of available commands
 	cmds.register("login", handlerLogin)
 	cmds.register("register", handlerRegister)
+	cmds.register("reset", handlerReset)
+	cmds.register("users", handlerUsers)
 
 	// Parse and prep the command entered on the CLI
 	cmdEntered := os.Args
