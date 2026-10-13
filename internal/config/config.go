@@ -58,6 +58,7 @@ func write(config Config) error {
 		return err
 	}
 
+	data = append(data, '\n') // so that the config file ends on a new line.
 	if err := os.WriteFile(configFilepath, []byte(data), 0644); err != nil {
 		fmt.Printf("Error writing file: %v.\n", err)
 		return err

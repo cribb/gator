@@ -94,7 +94,7 @@ func handlerRegister(s *state, cmd command) error {
 	if err != nil {
 		return fmt.Errorf("Error: failed when creating database user '%v'.\n  (%w)", newUserName, err)
 	}
-	fmt.Printf("created user '%v'.\n", user.Name)
+	fmt.Printf("created user '%v'\n", user.Name)
 	// fmt.Printf("userdata: %v\n", user)
 
 	err = s.cfg.SetUser(user.Name)
@@ -131,6 +131,23 @@ func handlerReset(s *state, cmd command) error {
 		return fmt.Errorf("Error reseting users table.\n  (%w)\n", err)
 	}
 	fmt.Println("Resetting users table: successful")
+	return nil
+}
+
+func handlerAgg(s *state, cmd command) error {
+
+	// feedURL := cmd.args[0]
+	feedURL := "https://www.wagslane.dev/index.xml"
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	feed, err := fetchFeed(ctx, feedURL)
+	if err != nil {
+		return fmt.Errorf("Feed not fetched. Well's run dry.")
+	}
+
+	fmt.Printf("feed: %v \n", feed)
 	return nil
 }
 
