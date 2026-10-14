@@ -1,4 +1,12 @@
 # gator
 
-This is my implementation of an RSS blog aggregator using go, which follows the accompanying boot.dev project.
+This is my implementation of an RSS blog aggregator using go that follows the accompanying boot.dev project.
 
+## Description
+
+## Build Notes
+
+Uses:
+  - postgresql and its CLI client, psql
+  - goose for database migrations
+  - sqlc, a sql-to-golang code generator

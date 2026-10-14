@@ -126,7 +126,13 @@ func handlerUsers(s *state, cmd command) error {
 }
 
 func handlerReset(s *state, cmd command) error {
-	err := s.db.ResetUsers(context.Background())
+	err := s.db.ResetFeeds(context.Background())
+	if err != nil {
+		return fmt.Errorf("Error reseting feeds table.\n  (%w)\n", err)
+	}
+	fmt.Println("Resetting feeds table: successful")
+
+	err = s.db.ResetUsers(context.Background())
 	if err != nil {
 		return fmt.Errorf("Error reseting users table.\n  (%w)\n", err)
 	}
@@ -148,6 +154,43 @@ func handlerAgg(s *state, cmd command) error {
 	}
 
 	fmt.Printf("feed: %v \n", feed)
+	return nil
+}
+
+func handlerAddFeed(s *state, cmd command) error {
+	N := len(cmd.args)
+	if N != 2 {
+		return fmt.Errorf("Error: incorrect numer of arguments.\n Usage: addfeed <name> <url>")
+	}
+
+	feedName := cmd.args[0]
+	feedUrl := cmd.args[1]
+
+	user, err := s.db.GetUser(context.Background(), s.cfg.CurrentUsername)
+	if err != nil {
+		return err
+	}
+
+	now := time.Now().UTC()
+
+	params := database.CreateFeedParams{
+		ID:        uuid.New(),
+		CreatedAt: now,
+		UpdatedAt: now,
+		Name:      feedName,
+		Url:       feedUrl,
+		UserID:    user.ID,
+	}
+
+	// fmt.Printf("feedName: %v, feedUrl: %v\n", feedName, feedUrl)
+	// fmt.Printf("params: %+v\n", params)
+
+	feed, err := s.db.CreateFeed(context.Background(), params)
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("FEED\n----\n%+v\n", feed)
 	return nil
 }
 

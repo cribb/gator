@@ -12,9 +12,10 @@ RETURNING *;
 SELECT * FROM users 
 WHERE name = $1;
 
--- name: ResetUsers :exec
-TRUNCATE users;
-
 -- name: GetUsers :many
 SELECT name FROM users;
+
+-- name: ResetUsers :exec
+TRUNCATE feeds, users;
+
 
