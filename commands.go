@@ -125,6 +125,16 @@ func handlerUsers(s *state, cmd command) error {
 	return nil
 }
 
+func handlerFeeds(s *state, cmd command) error {
+	feeds, err := s.db.GetFeeds(context.Background())
+	if err != nil {
+		return fmt.Errorf("Error generating feed list.\n  (%w)\n", err)
+	}
+	fmt.Printf("feeds: \n %+v\n", feeds)
+	return nil
+
+}
+
 func handlerReset(s *state, cmd command) error {
 	err := s.db.ResetFeeds(context.Background())
 	if err != nil {

@@ -18,5 +18,7 @@ WHERE name = $1;
 TRUNCATE feeds;
 
 -- name: GetFeeds :many
-SELECT name FROM feeds;
-
+SELECT feeds.name, feeds.url, feeds.user_id, users.name
+FROM feeds
+INNER JOIN users
+  ON feeds.user_id = users.id;

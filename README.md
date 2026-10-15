@@ -10,3 +10,6 @@ Uses:
   - postgresql and its CLI client, psql
   - goose for database migrations
   - sqlc, a sql-to-golang code generator
+
+To generate go code from sql queries:
+``` sqlc generate``` while in the project root dir
