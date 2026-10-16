@@ -14,11 +14,16 @@ RETURNING *;
 SELECT * FROM feeds
 WHERE name = $1;
 
--- name: ResetFeeds :exec
-TRUNCATE feeds;
+-- name: GetFeedByUrl :one
+SELECT * FROM feeds
+WHERE url = $1;
 
 -- name: GetFeeds :many
-SELECT feeds.name, feeds.url, feeds.user_id, users.name
+SELECT 
+  feeds.name AS feed_name, 
+  feeds.url, 
+  feeds.user_id, 
+  users.name AS user_name
 FROM feeds
 INNER JOIN users
   ON feeds.user_id = users.id;

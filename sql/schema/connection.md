@@ -4,7 +4,16 @@
 
 `postgres://postgres:postgres@localhost:5432/gator`
 
-## Migrations
+## Connecting directly to postgresql cli (psql) for gator db
+
+`psql <connection string>`
+
+```bash
+psql "postgres://postgres:postgres@localhost:5432/gator"
+```
+
+
+## Goose Migrations
 
 Run from the `sql/schema` directory...
 

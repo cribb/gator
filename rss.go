@@ -1,20 +1,12 @@
 package main
 
 import (
-	// "bufio"
-	// "encoding/json"
 	"context"
 	"encoding/xml"
 	"fmt"
 	"html"
 	"io"
 	"net/http"
-	// "strings"
-	//"time"
-	// "github.com/cribb/gator/internal/config"
-	// "github.com/cribb/gator/internal/database"
-	// "github.com/google/uuid"
-	// "go.opentelemetry.io/otel/semconv/v1.43.0/dbconv"
 )
 
 type RSSFeed struct {
@@ -77,57 +69,3 @@ func fetchFeed(ctx context.Context, feedURL string) (*RSSFeed, error) {
 
 	return &feed, nil
 }
-
-// 	// res :=
-// 	xml.Unmarshal(data, &res)
-// 	// ctx.Value()
-// 	foo := xml.Comment("example comment")
-
-// 	bar := html.EscapeString("")
-// 	bar = strings.ToLower(bar)
-// 	fmt.Printf("%v: %v\n", foo, bar)
-
-// 	// return nil, fmt.Errorf("Not yet implemented.")
-// }
-
-// func getDataFromNetwork(url string) ([]byte, error) {
-// 	res, err := http.Get(url)
-// 	if err != nil {
-// 		fmt.Printf("Error in GET functionality.\n")
-// 		return nil, fmt.Errorf("error creating request: %w", err)
-// 	}
-
-// 	body, err := io.ReadAll(res.Body)
-// 	// fmt.Printf(" --> body: %v, err: %v\n", res.Body, err)
-// 	defer res.Body.Close()
-
-// 	if err != nil {
-// 		return nil, err
-// 	}
-
-// 	if res.StatusCode > 299 {
-// 		// fmt.Printf("Response failed with status code: %d and\nbody: %s\n", res.StatusCode, body)
-// 		return nil, fmt.Errorf("Response failed with status code: %d", res.StatusCode)
-// 	}
-
-// 	return body, nil
-// }
-
-// // Pulls data either directly from the website API (slow) or from the local cache (fast)
-// func fetchData(config *cliConfig, url string) ([]byte, error) {
-// 	var body []byte
-// 	var ok bool
-// 	var err error
-
-// 	body, ok = config.cache.Get(url)
-// 	if !ok {
-// 		body, err = getDataFromNetwork(url)
-
-// 		if err != nil {
-// 			return nil, err
-// 		}
-// 		config.cache.Add(url, body)
-// 	}
-// 	return body, nil
-
-// }

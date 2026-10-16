@@ -7,7 +7,7 @@ CREATE TABLE feeds
     name TEXT NOT NULL UNIQUE,
     url TEXT NOT NULL UNIQUE,
     user_id UUID NOT NULL,
-    
+
     FOREIGN KEY (user_id)
       REFERENCES users(id)
       ON DELETE CASCADE

@@ -74,18 +74,41 @@ func (q *Queries) GetFeed(ctx context.Context, name string) (Feed, error) {
 	return i, err
 }
 
+const getFeedByUrl = `-- name: GetFeedByUrl :one
+SELECT id, created_at, updated_at, name, url, user_id FROM feeds
+WHERE url = $1
+`
+
+func (q *Queries) GetFeedByUrl(ctx context.Context, url string) (Feed, error) {
+	row := q.db.QueryRowContext(ctx, getFeedByUrl, url)
+	var i Feed
+	err := row.Scan(
+		&i.ID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.Name,
+		&i.Url,
+		&i.UserID,
+	)
+	return i, err
+}
+
 const getFeeds = `-- name: GetFeeds :many
-SELECT feeds.name, feeds.url, feeds.user_id, users.name
+SELECT 
+  feeds.name AS feed_name, 
+  feeds.url, 
+  feeds.user_id, 
+  users.name AS user_name
 FROM feeds
 INNER JOIN users
   ON feeds.user_id = users.id
 `
 
 type GetFeedsRow struct {
-	Name   string
-	Url    string
-	UserID uuid.UUID
-	Name_2 string
+	FeedName string
+	Url      string
+	UserID   uuid.UUID
+	UserName string
 }
 
 func (q *Queries) GetFeeds(ctx context.Context) ([]GetFeedsRow, error) {
@@ -98,10 +121,10 @@ func (q *Queries) GetFeeds(ctx context.Context) ([]GetFeedsRow, error) {
 	for rows.Next() {
 		var i GetFeedsRow
 		if err := rows.Scan(
-			&i.Name,
+			&i.FeedName,
 			&i.Url,
 			&i.UserID,
-			&i.Name_2,
+			&i.UserName,
 		); err != nil {
 			return nil, err
 		}
@@ -114,13 +137,4 @@ func (q *Queries) GetFeeds(ctx context.Context) ([]GetFeedsRow, error) {
 		return nil, err
 	}
 	return items, nil
-}
-
-const resetFeeds = `-- name: ResetFeeds :exec
-TRUNCATE feeds
-`
-
-func (q *Queries) ResetFeeds(ctx context.Context) error {
-	_, err := q.db.ExecContext(ctx, resetFeeds)
-	return err
 }

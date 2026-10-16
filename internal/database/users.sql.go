@@ -90,12 +90,3 @@ func (q *Queries) GetUsers(ctx context.Context) ([]string, error) {
 	}
 	return items, nil
 }
-
-const resetUsers = `-- name: ResetUsers :exec
-TRUNCATE feeds, users
-`
-
-func (q *Queries) ResetUsers(ctx context.Context) error {
-	_, err := q.db.ExecContext(ctx, resetUsers)
-	return err
-}

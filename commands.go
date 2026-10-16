@@ -1,9 +1,6 @@
 package main
 
 import (
-	// "bufio"
-	// "encoding/json"
-	// "strings"
 	"context"
 	"fmt"
 	"time"
@@ -11,7 +8,6 @@ import (
 	"github.com/cribb/gator/internal/config"
 	"github.com/cribb/gator/internal/database"
 	"github.com/google/uuid"
-	// "go.opentelemetry.io/otel/semconv/v1.43.0/dbconv"
 )
 
 type state struct {
@@ -68,7 +64,7 @@ func handlerLogin(s *state, cmd command) error {
 		// fmt.Println("failed to set user.")
 		return err
 	}
-	fmt.Printf("User set to: %v\n", user)
+	fmt.Printf("User set to: %v\n", user.Name)
 	return nil
 }
 
@@ -136,17 +132,12 @@ func handlerFeeds(s *state, cmd command) error {
 }
 
 func handlerReset(s *state, cmd command) error {
-	err := s.db.ResetFeeds(context.Background())
+	err := s.db.ResetDatabase(context.Background())
 	if err != nil {
-		return fmt.Errorf("Error reseting feeds table.\n  (%w)\n", err)
+		return fmt.Errorf("Error reseting feed_follows table.\n  (%w)\n", err)
 	}
-	fmt.Println("Resetting feeds table: successful")
+	fmt.Println("Resetting database: successful")
 
-	err = s.db.ResetUsers(context.Background())
-	if err != nil {
-		return fmt.Errorf("Error reseting users table.\n  (%w)\n", err)
-	}
-	fmt.Println("Resetting users table: successful")
 	return nil
 }
 
@@ -167,7 +158,7 @@ func handlerAgg(s *state, cmd command) error {
 	return nil
 }
 
-func handlerAddFeed(s *state, cmd command) error {
+func handlerAddFeed(s *state, cmd command, user database.User) error {
 	N := len(cmd.args)
 	if N != 2 {
 		return fmt.Errorf("Error: incorrect numer of arguments.\n Usage: addfeed <name> <url>")
@@ -176,10 +167,10 @@ func handlerAddFeed(s *state, cmd command) error {
 	feedName := cmd.args[0]
 	feedUrl := cmd.args[1]
 
-	user, err := s.db.GetUser(context.Background(), s.cfg.CurrentUsername)
-	if err != nil {
-		return err
-	}
+	// user, err := s.db.GetUser(context.Background(), s.cfg.CurrentUsername)
+	// if err != nil {
+	// 	return err
+	// }
 
 	now := time.Now().UTC()
 
@@ -192,19 +183,112 @@ func handlerAddFeed(s *state, cmd command) error {
 		UserID:    user.ID,
 	}
 
-	// fmt.Printf("feedName: %v, feedUrl: %v\n", feedName, feedUrl)
-	// fmt.Printf("params: %+v\n", params)
-
 	feed, err := s.db.CreateFeed(context.Background(), params)
 	if err != nil {
 		return err
 	}
+	fmt.Printf("Added feed...\n  * %+v\t(%+v)\n", feed.Name, feed.Url)
 
-	fmt.Printf("FEED\n----\n%+v\n", feed)
+	followParams := database.CreateFeedFollowParams{
+		ID:        uuid.New(),
+		CreatedAt: now,
+		UpdatedAt: now,
+		UserID:    user.ID,
+		FeedID:    feed.ID,
+	}
+
+	feedRow, err := s.db.CreateFeedFollow(context.Background(), followParams)
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("User: %v\n", feedRow.UserName)
+	fmt.Printf("Followed feed: %v\n", feedRow.FeedName)
+
 	return nil
 }
 
-// func (c *commands) handlerHelp(config *cliConfig, cmdArgs []string) error {
+func handlerFollow(s *state, cmd command, user database.User) error {
+	N := len(cmd.args)
+	if N != 1 {
+		return fmt.Errorf("Error: incorrect numer of arguments.\n Usage: follow <url>")
+	}
+
+	url := cmd.args[0]
+
+	feed, err := s.db.GetFeedByUrl(context.Background(), url)
+	if err != nil {
+		return err
+	}
+
+	// currentUser := s.cfg.CurrentUsername
+	// user, err := s.db.GetUser(context.Background(), currentUser)
+	// if err != nil {
+	// 	return err
+	// }
+
+	// fmt.Printf("feed ID: %v\n", feed.ID)
+	// fmt.Printf("User ID: %v\n", user.ID)
+
+	now := time.Now().UTC()
+
+	params := database.CreateFeedFollowParams{
+		ID:        uuid.New(),
+		CreatedAt: now,
+		UpdatedAt: now,
+		UserID:    user.ID,
+		FeedID:    feed.ID,
+	}
+
+	feedRow, err := s.db.CreateFeedFollow(context.Background(), params)
+	if err != nil {
+		return err
+	}
+
+	// fmt.Printf("feedRow: %+v\n", feedRow)
+	fmt.Printf("User: %v\n", feedRow.UserName)
+	fmt.Printf("Followed feed: %v\n", feedRow.FeedName)
+	return nil
+}
+
+func handlerFollowing(s *state, cmd command, user database.User) error {
+
+	// currentUser := s.cfg.CurrentUsername
+	// user, err := s.db.GetUser(context.Background(), currentUser)
+	// if err != nil {
+	// 	return err
+	// }
+
+	feeds, err := s.db.GetFeedFollowsForUser(context.Background(), user.Name)
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("User: %v\n", user.Name)
+	// fmt.Printf("Feeds: %v\n", feeds)
+
+	fmt.Printf("Following: \n")
+	for _, feed := range feeds {
+		fmt.Printf(" * %s\n", feed.FeedName)
+	}
+
+	return nil
+}
+
+func middlewareLoggedIn(handler func(s *state, cmd command, user database.User) error) func(*state, command) error {
+
+	return func(s *state, cmd command) error {
+		user, err := s.db.GetUser(context.Background(), s.cfg.CurrentUsername)
+
+		if err != nil {
+			return err
+		}
+		return handler(s, cmd, user)
+	}
+
+}
+
+// func (c *commands) handlerHelp(s *state, cmd command) error {
 // 	fmt.Printf("\nWelcome to Gator, the Aggregator!\nUsage:\n\n")
 // 	commands := getCommands()
 

@@ -15,7 +15,5 @@ WHERE name = $1;
 -- name: GetUsers :many
 SELECT name FROM users;
 
--- name: ResetUsers :exec
-TRUNCATE feeds, users;
 
 
