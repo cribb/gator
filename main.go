@@ -39,12 +39,13 @@ func main() {
 	cmds.register("login", handlerLogin)
 	cmds.register("register", handlerRegister)
 	cmds.register("reset", handlerReset)
-	cmds.register("users", handlerUsers)
 	cmds.register("agg", handlerAgg)
-	cmds.register("addfeed", middlewareLoggedIn(handlerAddFeed))
+	cmds.register("users", handlerUsers)
 	cmds.register("feeds", handlerFeeds)
+	cmds.register("addfeed", middlewareLoggedIn(handlerAddFeed))
 	cmds.register("follow", middlewareLoggedIn(handlerFollow))
 	cmds.register("following", middlewareLoggedIn(handlerFollowing))
+	cmds.register("unfollow", middlewareLoggedIn(handlerUnfollow))
 
 	// Parse and prep the command entered on the CLI
 	cmdEntered := os.Args

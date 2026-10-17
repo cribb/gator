@@ -275,6 +275,35 @@ func handlerFollowing(s *state, cmd command, user database.User) error {
 	return nil
 }
 
+func handlerUnfollow(s *state, cmd command, user database.User) error {
+	// find userid from user name -- actually, no, because the user id is passed in as cmd.argument
+
+	N := len(cmd.args)
+	if N != 1 {
+		return fmt.Errorf("Error: incorrect numer of arguments.\n Usage: unfollow <url>")
+	}
+
+	url := cmd.args[0]
+
+	feed, err := s.db.GetFeedByUrl(context.Background(), url)
+	if err != nil {
+		return err
+	}
+
+	params := database.DeleteFeedFollowParams{
+		UserID: user.ID,
+		FeedID: feed.ID,
+	}
+
+	err = s.db.DeleteFeedFollow(context.Background(), params)
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("User %v no longer follows \"%v\" (%v).\n", user.Name, feed.Name, feed.Url)
+	return nil
+}
+
 func middlewareLoggedIn(handler func(s *state, cmd command, user database.User) error) func(*state, command) error {
 
 	return func(s *state, cmd command) error {
