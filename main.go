@@ -46,6 +46,7 @@ func main() {
 	cmds.register("follow", middlewareLoggedIn(handlerFollow))
 	cmds.register("following", middlewareLoggedIn(handlerFollowing))
 	cmds.register("unfollow", middlewareLoggedIn(handlerUnfollow))
+	cmds.register("browse", middlewareLoggedIn((handlerBrowse)))
 
 	// Parse and prep the command entered on the CLI
 	cmdEntered := os.Args

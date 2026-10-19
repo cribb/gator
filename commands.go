@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/cribb/gator/internal/config"
@@ -324,6 +325,47 @@ func handlerUnfollow(s *state, cmd command, user database.User) error {
 	}
 
 	fmt.Printf("User %v no longer follows \"%v\" (%v).\n", user.Name, feed.Name, feed.Url)
+	return nil
+}
+
+func handlerBrowse(s *state, cmd command, user database.User) error {
+	N := len(cmd.args)
+
+	var limit int32
+
+	if N > 1 {
+		return fmt.Errorf("Error: incorrect numer of arguments.\n Usage: browse <limit>")
+	}
+
+	if N == 1 {
+		limit64, err := strconv.ParseInt(cmd.args[0], 10, 32)
+		if err != nil {
+			return err
+		}
+		limit = int32(limit64)
+	}
+
+	if N < 1 {
+		fmt.Println("Setting limit to default (2).")
+		limit = 2
+	}
+
+	fmt.Printf("Printing %v posts to the console...\n", limit)
+
+	params := database.GetPostsForUserParams{
+		UserID: user.ID,
+		Limit:  limit,
+	}
+
+	posts, err := s.db.GetPostsForUser(context.Background(), params)
+	if err != nil {
+		return err
+	}
+
+	for i, post := range posts {
+		fmt.Printf("  %v. %v\n", i+1, post.Title)
+	}
+
 	return nil
 }
 

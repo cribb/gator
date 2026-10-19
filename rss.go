@@ -2,11 +2,16 @@ package main
 
 import (
 	"context"
+	"database/sql"
 	"encoding/xml"
 	"fmt"
 	"html"
 	"io"
 	"net/http"
+	"time"
+
+	"github.com/cribb/gator/internal/database"
+	"github.com/google/uuid"
 )
 
 type RSSFeed struct {
@@ -90,9 +95,42 @@ func scrapeFeeds(s *state) error {
 		return err
 	}
 
+	// fmt.Println("Item Titles:")
+	// for _, item := range rssFeed.Channel.Item {
+	// 	fmt.Printf(" * %v\n", item.Title)
+	// }
+
 	fmt.Println("Item Titles:")
 	for _, item := range rssFeed.Channel.Item {
-		fmt.Printf(" * %v\n", item.Title)
+
+		now := time.Now().UTC()
+
+		var sqlDesc sql.NullString
+		if len(item.Description) != 0 {
+			sqlDesc.String = item.Description
+			sqlDesc.Valid = true
+		}
+
+		var pubTime sql.NullTime
+		t, err := time.Parse(time.RFC1123, item.PubDate)
+		if err == nil {
+			pubTime.Time = t
+			pubTime.Valid = true
+		}
+
+		params := database.CreatePostParams{
+			ID:          uuid.New(),
+			CreatedAt:   now,
+			UpdatedAt:   now,
+			Title:       item.Title,
+			Url:         item.Link,
+			Description: sqlDesc,
+			PublishedAt: pubTime,
+			FeedID:      feed.ID,
+		}
+
+		s.db.CreatePost(context.Background(), params)
 	}
+
 	return nil
 }
