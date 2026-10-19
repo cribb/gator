@@ -14,7 +14,7 @@ type Config struct {
 const configFilename = ".gatorconfig.json"
 
 func Read() (Config, error) {
-	fmt.Println("Reading config...")
+	// fmt.Println("Reading config...")
 	configFilename, err := getConfigFilePath()
 	if err != nil {
 		fmt.Printf("Config file (%v) not found.\n", configFilename)

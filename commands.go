@@ -110,6 +110,7 @@ func handlerUsers(s *state, cmd command) error {
 
 	currentUser := s.cfg.CurrentUsername
 
+	fmt.Println("List of Users:")
 	for _, user := range users {
 		fmt.Printf(" * %s", user)
 		if user == currentUser {
@@ -117,6 +118,7 @@ func handlerUsers(s *state, cmd command) error {
 		}
 		fmt.Println()
 	}
+	fmt.Println()
 
 	return nil
 }
@@ -126,7 +128,14 @@ func handlerFeeds(s *state, cmd command) error {
 	if err != nil {
 		return fmt.Errorf("Error generating feed list.\n  (%w)\n", err)
 	}
-	fmt.Printf("feeds: \n %+v\n", feeds)
+
+	fmt.Println("List of Feeds:")
+	for _, feed := range feeds {
+		fmt.Printf(" * %s\n", feed.FeedName)
+	}
+	fmt.Println()
+
+	// fmt.Printf("feeds: \n %+v\n", feeds)
 	return nil
 
 }
@@ -142,20 +151,34 @@ func handlerReset(s *state, cmd command) error {
 }
 
 func handlerAgg(s *state, cmd command) error {
-
-	// feedURL := cmd.args[0]
-	feedURL := "https://www.wagslane.dev/index.xml"
-
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	feed, err := fetchFeed(ctx, feedURL)
-	if err != nil {
-		return fmt.Errorf("Feed not fetched. Well's run dry.")
+	N := len(cmd.args)
+	if N != 1 {
+		return fmt.Errorf("Error: incorrect numer of arguments.\n Usage: addfeed <interval>")
 	}
 
-	fmt.Printf("feed: %v \n", feed)
-	return nil
+	intervalString := cmd.args[0]
+
+	interval, err := time.ParseDuration(intervalString)
+	if err != nil {
+		return err
+	}
+
+	// ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	// defer cancel()
+
+	fmt.Printf("Collecting feeds every %v\n", interval)
+	ticker := time.NewTicker(interval)
+	for ; ; <-ticker.C {
+		scrapeFeeds(s)
+	}
+
+	// feed, err := fetchFeed(ctx, feedURL)
+	// if err != nil {
+	// 	return fmt.Errorf("Feed not fetched. Well's run dry.")
+	// }
+
+	// fmt.Printf("feed: %v \n", feed)
+	// return nil
 }
 
 func handlerAddFeed(s *state, cmd command, user database.User) error {
