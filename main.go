@@ -36,6 +36,7 @@ func main() {
 	}
 
 	// Register the list of available commands
+	cmds.register("help", handlerHelp)
 	cmds.register("login", handlerLogin)
 	cmds.register("register", handlerRegister)
 	cmds.register("reset", handlerReset)

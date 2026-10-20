@@ -19,5 +19,7 @@ echo "...done"
 ./gator addfeed "TechCrunch" "https://techcrunch.com/feed/"
 ./gator feeds
 ./gator users
-./gator agg 1m
-
+./gator agg 5m & # proto-server running in background
+sleep 1
+./gator browse 2
+echo "Don't forget to kill the proto-server. (jobs; kill %1)

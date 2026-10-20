@@ -71,9 +71,9 @@ func handlerLogin(s *state, cmd command) error {
 
 func handlerRegister(s *state, cmd command) error {
 	if len(cmd.args) == 0 {
-		return fmt.Errorf("Error: no username provided.")
+		return fmt.Errorf("Error: no username provided. Usage: register <username>")
 	} else if len(cmd.args) > 1 {
-		return fmt.Errorf("Error: too many parameters.")
+		return fmt.Errorf("Error: too many parameters. Usage: register <username>")
 	}
 
 	newUserName := cmd.args[0]
@@ -154,7 +154,7 @@ func handlerReset(s *state, cmd command) error {
 func handlerAgg(s *state, cmd command) error {
 	N := len(cmd.args)
 	if N != 1 {
-		return fmt.Errorf("Error: incorrect numer of arguments.\n Usage: addfeed <interval>")
+		return fmt.Errorf("Error: incorrect numer of arguments.\n Usage: agg <interval>")
 	}
 
 	intervalString := cmd.args[0]
@@ -190,11 +190,6 @@ func handlerAddFeed(s *state, cmd command, user database.User) error {
 
 	feedName := cmd.args[0]
 	feedUrl := cmd.args[1]
-
-	// user, err := s.db.GetUser(context.Background(), s.cfg.CurrentUsername)
-	// if err != nil {
-	// 	return err
-	// }
 
 	now := time.Now().UTC()
 
@@ -277,12 +272,6 @@ func handlerFollow(s *state, cmd command, user database.User) error {
 
 func handlerFollowing(s *state, cmd command, user database.User) error {
 
-	// currentUser := s.cfg.CurrentUsername
-	// user, err := s.db.GetUser(context.Background(), currentUser)
-	// if err != nil {
-	// 	return err
-	// }
-
 	feeds, err := s.db.GetFeedFollowsForUser(context.Background(), user.Name)
 	if err != nil {
 		return err
@@ -300,7 +289,6 @@ func handlerFollowing(s *state, cmd command, user database.User) error {
 }
 
 func handlerUnfollow(s *state, cmd command, user database.User) error {
-	// find userid from user name -- actually, no, because the user id is passed in as cmd.argument
 
 	N := len(cmd.args)
 	if N != 1 {
@@ -382,13 +370,27 @@ func middlewareLoggedIn(handler func(s *state, cmd command, user database.User) 
 
 }
 
-// func (c *commands) handlerHelp(s *state, cmd command) error {
-// 	fmt.Printf("\nWelcome to Gator, the Aggregator!\nUsage:\n\n")
-// 	commands := getCommands()
+func handlerHelp(s *state, cmd command) error {
+	fmt.Printf("\nWelcome to Gator, the Aggregator!\n\nCommands:\n")
 
-// 	for _, command := range commands {
-// 		fmt.Printf(" %v\t%v\n", command.name, command.description)
-// 	}
-// 	fmt.Println()
-// 	return nil
-// }
+	help := map[string]string{
+		"login":     "logs user in",
+		"register":  "creates user account, usage: register <username>",
+		"reset":     "removes all data and resets gator database",
+		"agg":       "collects posts from feeds (starts proto-server)",
+		"users":     "lists available users",
+		"feeds":     "lists available feeds",
+		"addfeed":   "adds feed to feed list, usage: addfeed <feedname> <url>",
+		"follow":    "follows feed, usage follow <name>",
+		"following": "lists feeds user follows",
+		"unfollow":  "unfollows feed for user, usage: unfollow <feedname>",
+		"browse":    "prints N posts to stdout, usage: browse <N>",
+	}
+
+	for commandName := range help {
+		fmt.Printf(" %v    \t%v\n", commandName, help[commandName])
+	}
+
+	fmt.Println()
+	return nil
+}
