@@ -1,17 +1,28 @@
 # Database info for gator
 
-## connection string for gator
+## Connection string
 
-`postgres://postgres:postgres@localhost:5432/gator`
+ Gator uses a "connection string" that specifies the connection to its postgresql database. Here, that string is:
+
+```
+postgres://postgres:postgres@localhost:5432/gator
+```
 
 ## Connecting directly to postgresql cli (psql) for gator db
 
-`psql <connection string>`
+To connect _directly_ to the gator database throu the postgresql cli, run:
+
+```
+psql <connection string>
+```
+
+Here, that full command would look like:
 
 ```bash
 psql "postgres://postgres:postgres@localhost:5432/gator"
 ```
 
+To get help with `psql` type "help". Commands in `psql` are preceded by a backslash, and "\h" will tell you all you need to know.
 
 ## Goose Migrations
 
@@ -20,7 +31,6 @@ Note: run goose from the `sql/schema` directory...
 ```bash
 goose postgres <connection string> [up|down]
 ```
-
 
 ### Migrate up
 
@@ -34,21 +44,52 @@ goose postgres "postgres://postgres:postgres@localhost:5432/gator" up
 goose postgres "postgres://postgres:postgres@localhost:5432/gator" down
 ```
 
-## Tables
+## Tables/Schema
 
 ### Users
 
-Columns:  id, created_at, updated_at, name 
+|   Column   |    Type    | Description             |
+|:----------:|:----------:|:------------------------|
+| id         |  UUID      | primary key (unique id) |
+| created_at |  TIMESTAMP | record's creation time  |
+| updated_at |  TIMESTAMP | record's update time    |
+| name       |  TEXT      | user name               |
+
 
 ### Feeds
 
-Columns:  id, created_at, updated_at, name, url, last_fetched_at, user_id (from JOIN) 
+|     Column      |    Type    | Description                 |
+|:---------------:|:----------:|:----------------------------|
+| id              |  UUID      | primary key (unique id)     |
+| created_at      |  TIMESTAMP | record's creation time      |
+| updated_at      |  TIMESTAMP | record's update time        |
+| name            |  TEXT      | rss feed name               |
+| url             |  TEXT      | rss feed url                |
+| last_fetched_at |  TIMESTAMP | feed's last fetch time      |
+| user_id         |  UUID      | users.id (JOIN from `users`)|
+
 
 ### Feed-follows
 
-Columns:  id, created_at, updated_at, user_id (from JOIN with Users), feed_id (from JOIN with Feeds)
+|     Column      |    Type    | Description                 |
+|:---------------:|:----------:|:----------------------------|
+| id              |  UUID      | primary key (unique id)     |
+| created_at      |  TIMESTAMP | record's creation time      |
+| updated_at      |  TIMESTAMP | record's update time        |
+| user_id         |  UUID      | users.id (JOIN from `users`)|
+| feed_id         |  UUID      | feeds.id (JOIN from `feeds`)|
+
 
 ### Posts
 
-Columns: id, created_at, updated_at, title, url, description, published_at, feed_id (from JOIN with Feeds)
+|     Column      |    Type    | Description                  |
+|:---------------:|:----------:|:-----------------------------|
+| id              |  UUID      | primary key (unique id)      |
+| created_at      |  TIMESTAMP | record's creation time       |
+| updated_at      |  TIMESTAMP | record's update time         |
+| title           |  TEXT      | blog post title              |
+| url             |  TEXT      | blog post url                |
+| description     |  TEXT      | blog post description        |
+| published_at    |  TIMESTAMP | blog post publication time   |
+| feed_id         |  UUID      | feeds.id (JOIN from `feeds`) |
 

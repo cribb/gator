@@ -53,6 +53,7 @@ func main() {
 	cmdEntered := os.Args
 	if len(cmdEntered) < 2 {
 		fmt.Println("No command provided.")
+		printHelp()
 		os.Exit(1)
 	}
 	cmd := command{

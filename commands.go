@@ -371,6 +371,11 @@ func middlewareLoggedIn(handler func(s *state, cmd command, user database.User) 
 }
 
 func handlerHelp(s *state, cmd command) error {
+	printHelp()
+	return nil
+}
+
+func printHelp() {
 	fmt.Printf("\nWelcome to Gator, the Aggregator!\n\nCommands:\n")
 
 	help := map[string]string{
@@ -390,7 +395,6 @@ func handlerHelp(s *state, cmd command) error {
 	for commandName := range help {
 		fmt.Printf(" %v    \t%v\n", commandName, help[commandName])
 	}
-
 	fmt.Println()
-	return nil
+
 }
